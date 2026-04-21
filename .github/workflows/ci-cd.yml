@@ -49,5 +49,24 @@ jobs:
     needs: build-and-push
 
     steps:
+      - name: Verificar Render secret
+        env:
+          RENDER_DEPLOY_HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$RENDER_DEPLOY_HOOK_URL" ]; then
+            echo "RENDER_DEPLOY_HOOK_URL VACIO"
+            exit 1
+          fi
+
+          case "$RENDER_DEPLOY_HOOK_URL" in
+            https://*)
+              echo "Render secret OK"
+              ;;
+            *)
+              echo "RENDER_DEPLOY_HOOK_URL no parece una URL valida"
+              exit 1
+              ;;
+          esac
+
       - name: Trigger Render Deploy
         run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
